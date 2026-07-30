@@ -1,0 +1,3 @@
+C:/Users/S3nit/OneDrive/Desktop/GAME-main/Car Fighter/build/CMakeFiles/game.dir
+C:/Users/S3nit/OneDrive/Desktop/GAME-main/Car Fighter/build/CMakeFiles/edit_cache.dir
+C:/Users/S3nit/OneDrive/Desktop/GAME-main/Car Fighter/build/CMakeFiles/rebuild_cache.dir
