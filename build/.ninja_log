@@ -1,0 +1,17 @@
+# ninja log v7
+12	337	8071763112571137	CMakeFiles/game.dir/main.c.obj	db0459c690be9c0d
+53	383	8071763112980012	CMakeFiles/game.dir/audiomanager.c.obj	b90dab757076a511
+20	486	8071763112670847	CMakeFiles/game.dir/game.c.obj	2a4a5c24d6944c2b
+33	830	8071763112870310	CMakeFiles/game.dir/ui.c.obj	afa0c727058d32d6
+831	1193	8071763120754778	game.exe	7bdaea2e6b5c2112
+10	1585	8071782840043475	CMakeFiles/game.dir/audiomanager.c.obj	b90dab757076a511
+1589	2369	8071782855863166	game.exe	7bdaea2e6b5c2112
+12	450	8071786882251383	CMakeFiles/game.dir/main.c.obj	db0459c690be9c0d
+63	613	8071786882939648	CMakeFiles/game.dir/audiomanager.c.obj	b90dab757076a511
+22	1176	8071786882450857	CMakeFiles/game.dir/game.c.obj	2a4a5c24d6944c2b
+46	1284	8071786882670315	CMakeFiles/game.dir/ui.c.obj	afa0c727058d32d6
+1285	1691	8071786894974045	game.exe	7bdaea2e6b5c2112
+10	684	8071787402965001	CMakeFiles/game.dir/ui.c.obj	afa0c727058d32d6
+685	1102	8071787409720318	game.exe	7bdaea2e6b5c2112
+11	235	8071787735665957	CMakeFiles/game.dir/audiomanager.c.obj	b90dab757076a511
+236	523	8071787737915377	game.exe	7bdaea2e6b5c2112

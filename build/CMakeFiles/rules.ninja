@@ -42,7 +42,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = C:\w64devkit\bin\cmake.exe --regenerate-during-build -S"C:\Users\S3nit\OneDrive\Desktop\GAME-main\Car Fighter" -B"C:\Users\S3nit\OneDrive\Desktop\GAME-main\Car Fighter\build"
+  command = C:\w64devkit\bin\cmake.exe --regenerate-during-build -S"F:\Programming\C programming\Final Project\Car Fighter\CO1810-Road_Fighter" -B"F:\Programming\C programming\Final Project\Car Fighter\CO1810-Road_Fighter\build"
   description = Re-running CMake...
   generator = 1
 

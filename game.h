@@ -5,11 +5,13 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define MAX_ENEMIES 5
-#define MAX_FUELS 3
+#define MAX_ENEMIES 3
+#define MAX_FUELS 2
+#define MAX_NITROS 1
+#define MAX_INVISIBLES 2
 
 // --- ENUMS ---
-typedef enum { MENU, PLAYING, SKIDDING, GAME_OVER } GameState;
+typedef enum { MENU, PLAYING, SKIDDING, GAME_OVER, PAUSED } GameState;
 
 typedef enum {
     ENEMY_CAR_BLUE,
@@ -46,6 +48,22 @@ typedef struct {
 
 typedef struct {
     Rectangle rect;
+    float speed;
+    Color color;
+    bool active;
+    int lane;
+} NitroItem;
+
+typedef struct {
+    Rectangle rect;
+    float speed;
+    Color color;
+    bool active;
+    int lane;
+} InvisibleItem;
+
+typedef struct {
+    Rectangle rect;
     bool active;
     int hitCount;
     float targetScoreThreshold;
@@ -77,12 +95,16 @@ typedef struct {
     Player player;
     Enemy enemies[MAX_ENEMIES];
     FuelItem fuels[MAX_FUELS];
+    NitroItem nitros[MAX_NITROS];
+    InvisibleItem invisibles[MAX_INVISIBLES];
     PoliceCar police;
     Ambulance ambulance;
     float roadOffset;
     float gameSpeed;
     float floatScore;
     float fuel;
+    float nitroTimer;
+    float invisibleTimer;
     char playerName[32];
     int highScore;
     int attempts;

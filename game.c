@@ -178,6 +178,14 @@ void InitGame(GameContext *game) {
         game->fuels[i].active = false;
     }
 
+    for (int i = 0; i < MAX_NITROS; i++) {
+        game->nitros[i].active = false;
+    }
+
+    for (int i = 0; i < MAX_INVISIBLES; i++) {
+        game->invisibles[i].active = false;
+    }
+
     game->police = (PoliceCar){
         .rect = { SCREEN_WIDTH / 2.0f - 15.0f, SCREEN_HEIGHT + 60.0f, 30.0f, 50.0f },
         .active = false,
@@ -201,6 +209,8 @@ void InitGame(GameContext *game) {
     game->gameSpeed = 200.0f;
     game->floatScore = 0.0f;
     game->fuel = 100.0f;
+    game->nitroTimer = 0.0f;
+    game->invisibleTimer = 0.0f;
 
     strcpy(game->playerName, tempName);
     game->highScore = savedHighScore;
@@ -217,6 +227,18 @@ void UpdateGame(GameContext *game, float dt) {
 
     if (game->currentState == PLAYING || game->currentState == SKIDDING) {
         
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            game->currentState = PAUSED;
+            return;
+        }
+
+        if (game->nitroTimer > 0.0f) {
+            game->nitroTimer -= dt;
+        }
+        if (game->invisibleTimer > 0.0f) {
+            game->invisibleTimer -= dt;
+        }
+
         game->roadOffset += game->gameSpeed * dt;
         if (game->roadOffset >= 40.0f) game->roadOffset = 0.0f;
 
@@ -241,8 +263,14 @@ void UpdateGame(GameContext *game, float dt) {
             bool isAccelerating = IsKeyDown(KEY_UP);
             bool isBraking = IsKeyDown(KEY_DOWN);
 
+            float maxAllowedSpeed = 650.0f;
+            if (game->nitroTimer > 0.0f) {
+                maxAllowedSpeed = 850.0f;
+            }
+
             if (isAccelerating) {
-                game->gameSpeed += 400.0f * dt;
+                float accelRate = (game->nitroTimer > 0.0f) ? 800.0f : 400.0f;
+                game->gameSpeed += accelRate * dt;
             } else if (isBraking) {
                 game->gameSpeed -= 500.0f * dt;
             } else {
@@ -250,7 +278,7 @@ void UpdateGame(GameContext *game, float dt) {
                 else if (game->gameSpeed < 200.0f) game->gameSpeed += 120.0f * dt;
             }
 
-            if (game->gameSpeed > 650.0f) game->gameSpeed = 650.0f;
+            if (game->gameSpeed > maxAllowedSpeed) game->gameSpeed = maxAllowedSpeed;
             if (game->gameSpeed < 50.0f) game->gameSpeed = 50.0f;
 
             float targetVelocityX = 0.0f;
@@ -314,6 +342,77 @@ void UpdateGame(GameContext *game, float dt) {
             }
         }
 
+        // --- FUEL ITEMS ---
+        for (int i = 0; i < MAX_FUELS; i++) {
+            if (!game->fuels[i].active) {
+                if (GetRandomValue(0, 300) < 1) {
+                    int lane = GetRandomValue(0, 2);
+                    game->fuels[i].active = true;
+                    game->fuels[i].lane = lane;
+                    game->fuels[i].rect = (Rectangle){ LANE_CENTERS[lane] - 12.0f, -50.0f, 24.0f, 30.0f };
+                    game->fuels[i].speed = (float)GetRandomValue(80, 140);
+                    game->fuels[i].color = (Color){ 240, 80, 160, 255 };
+                }
+            } else {
+                game->fuels[i].rect.y += (game->gameSpeed - game->fuels[i].speed) * dt;
+                if (game->fuels[i].rect.y > SCREEN_HEIGHT) game->fuels[i].active = false;
+
+                if (CheckCollisionRecs(game->player.rect, game->fuels[i].rect)) {
+                    game->fuels[i].active = false;
+                    PlayFuelSound();
+                    game->fuel += 30.0f;
+                    if (game->fuel > 100.0f) game->fuel = 100.0f;
+                }
+            }
+        }
+
+        // --- NITRO ITEMS (BLUE) ---
+        for (int i = 0; i < MAX_NITROS; i++) {
+            if (!game->nitros[i].active) {
+                if (GetRandomValue(0, 800) < 1) {
+                    int lane = GetRandomValue(0, 2);
+                    game->nitros[i].active = true;
+                    game->nitros[i].lane = lane;
+                    game->nitros[i].rect = (Rectangle){ LANE_CENTERS[lane] - 12.0f, -50.0f, 24.0f, 30.0f };
+                    game->nitros[i].speed = (float)GetRandomValue(80, 140);
+                    game->nitros[i].color = (Color){ 0, 160, 255, 255 };
+                }
+            } else {
+                game->nitros[i].rect.y += (game->gameSpeed - game->nitros[i].speed) * dt;
+                if (game->nitros[i].rect.y > SCREEN_HEIGHT) game->nitros[i].active = false;
+
+                if (CheckCollisionRecs(game->player.rect, game->nitros[i].rect)) {
+                    game->nitros[i].active = false;
+                    PlayNitroSound();
+                    game->nitroTimer = 6.0f;
+                }
+            }
+        }
+
+        // --- INVISIBLE ITEMS (GREEN) ---
+        for (int i = 0; i < MAX_INVISIBLES; i++) {
+            if (!game->invisibles[i].active) {
+                if (GetRandomValue(0, 900) < 1) {
+                    int lane = GetRandomValue(0, 2);
+                    game->invisibles[i].active = true;
+                    game->invisibles[i].lane = lane;
+                    game->invisibles[i].rect = (Rectangle){ LANE_CENTERS[lane] - 12.0f, -50.0f, 24.0f, 30.0f };
+                    game->invisibles[i].speed = (float)GetRandomValue(80, 140);
+                    game->invisibles[i].color = (Color){ 46, 204, 113, 255 };
+                }
+            } else {
+                game->invisibles[i].rect.y += (game->gameSpeed - game->invisibles[i].speed) * dt;
+                if (game->invisibles[i].rect.y > SCREEN_HEIGHT) game->invisibles[i].active = false;
+
+                if (CheckCollisionRecs(game->player.rect, game->invisibles[i].rect)) {
+                    game->invisibles[i].active = false;
+                    PlayInvisibleSound();
+                    game->invisibleTimer = 7.0f;
+                }
+            }
+        }
+
+        // --- POLICE & AMBULANCE ---
         if (!game->police.active && !game->ambulance.active && (IsKeyPressed(KEY_P) || game->floatScore >= game->police.targetScoreThreshold)) {
             game->police.active = true;
             PlayPoliceSirenSound();
@@ -509,6 +608,7 @@ void UpdateGame(GameContext *game, float dt) {
             }
         }
 
+        // --- ENEMIES ---
         for (int i = 0; i < MAX_ENEMIES; i++) {
             if (!game->enemies[i].active) {
                 if (GetRandomValue(0, 100) < 2) {
@@ -561,120 +661,57 @@ void UpdateGame(GameContext *game, float dt) {
                 game->enemies[i].rect.y += (game->gameSpeed - game->enemies[i].speed) * dt;
                 if (game->enemies[i].rect.y > SCREEN_HEIGHT) game->enemies[i].active = false;
 
-                if (!game->enemies[i].isShifting) {
-                    game->enemies[i].laneShiftTimer -= dt;
-                    if (game->enemies[i].laneShiftTimer <= 0.0f) {
-                        int shiftDir = GetRandomValue(0, 1) == 0 ? -1 : 1;
-                        int potentialLane = game->enemies[i].currentLane + shiftDir;
+                if (game->ambulance.active && !game->enemies[i].isShifting) {
+                    if (game->ambulance.targetLane == game->enemies[i].currentLane &&
+                        game->ambulance.rect.y > game->enemies[i].rect.y &&
+                        (game->ambulance.rect.y - game->enemies[i].rect.y) < 250.0f) {
+                        
+                        int currentLane = game->enemies[i].currentLane;
+                        int candidateLanes[2];
+                        int candidateCount = 0;
+                        if (currentLane - 1 >= 0) candidateLanes[candidateCount++] = currentLane - 1;
+                        if (currentLane + 1 <= 2) candidateLanes[candidateCount++] = currentLane + 1;
 
-                        if (potentialLane >= 0 && potentialLane <= 2) {
-                            bool targetLaneClear = true;
+                        for (int c = 0; c < candidateCount; c++) {
+                            int targetL = candidateLanes[c];
+                            bool laneClear = true;
+
                             for (int j = 0; j < MAX_ENEMIES; j++) {
                                 if (i != j && game->enemies[j].active) {
-                                    if (game->enemies[j].targetLane == potentialLane &&
+                                    if (game->enemies[j].targetLane == targetL &&
                                         fabsf(game->enemies[i].rect.y - game->enemies[j].rect.y) < 90.0f) {
-                                        targetLaneClear = false;
-                                        break;
+                                        laneClear = false;
                                     }
                                 }
                             }
 
-                            if (targetLaneClear) {
-                                game->enemies[i].targetLane = potentialLane;
+                            if (laneClear) {
+                                game->enemies[i].targetLane = targetL;
                                 game->enemies[i].isShifting = true;
-                                PlayDoubleHornSound();
+                                break;
                             }
                         }
-                        game->enemies[i].laneShiftTimer = (float)GetRandomValue(4, 8);
                     }
                 }
 
-                float targetX = LANE_CENTERS[game->enemies[i].targetLane] - (game->enemies[i].rect.width / 2.0f);
-                game->enemies[i].rect.x = SmoothLerp(game->enemies[i].rect.x, targetX, 7.0f * dt);
-
-                if (fabsf(game->enemies[i].rect.x - targetX) < 1.0f) {
-                    game->enemies[i].currentLane = game->enemies[i].targetLane;
-                    game->enemies[i].isShifting = false;
-                }
-                
-                for (int j = 0; j < MAX_ENEMIES; j++) {
-                    if (i != j && game->enemies[j].active) {
-                        if (CheckCollisionRecs(game->enemies[i].rect, game->enemies[j].rect)) {
-                            if (game->enemies[i].rect.y > game->enemies[j].rect.y) {
-                                game->enemies[i].rect.y = game->enemies[j].rect.y + game->enemies[j].rect.height + 2.0f;
-                                game->enemies[i].speed = game->enemies[j].speed;
-                            }
-                        }
+                if (game->enemies[i].isShifting) {
+                    float targetX = LANE_CENTERS[game->enemies[i].targetLane] - (game->enemies[i].rect.width / 2.0f);
+                    game->enemies[i].rect.x = SmoothLerp(game->enemies[i].rect.x, targetX, 4.0f * dt);
+                    if (fabsf(game->enemies[i].rect.x - targetX) < 1.0f) {
+                        game->enemies[i].currentLane = game->enemies[i].targetLane;
+                        game->enemies[i].isShifting = false;
                     }
                 }
 
                 if (game->currentState == PLAYING && CheckCollisionRecs(game->player.rect, game->enemies[i].rect)) {
-                    PlayBreakSound();
-                    game->currentState = SKIDDING;
-                    game->player.skidTimer = 0.9f;
-                    game->player.skidDirection = (game->player.rect.x < game->enemies[i].rect.x) ? -1 : 1;
-                }
-            }
-        }
-
-        for (int i = 0; i < MAX_FUELS; i++) {
-            if (!game->fuels[i].active) {
-                if (GetRandomValue(0, 1000) < 4) {
-                    int spawnLane = GetRandomValue(0, 2);
-
-                    bool laneBlocked = false;
-                    for (int j = 0; j < MAX_ENEMIES; j++) {
-                        if (game->enemies[j].active && game->enemies[j].currentLane == spawnLane && game->enemies[j].rect.y < 120.0f) {
-                            laneBlocked = true;
-                            break;
-                        }
-                    }
-
-                    if (!laneBlocked) {
-                        game->fuels[i].active = true;
-                        game->fuels[i].lane = spawnLane;
-                        game->fuels[i].rect = (Rectangle){ LANE_CENTERS[spawnLane] - 15.0f, -60.0f, 30.0f, 25.0f };
-                        game->fuels[i].speed = 120.0f;
-                        game->fuels[i].color = (Color){ 240, 100, 240, 255 };
-                    }
-                }
-            } else {
-                game->fuels[i].rect.y += (game->gameSpeed - game->fuels[i].speed) * dt;
-                if (game->fuels[i].rect.y > SCREEN_HEIGHT) {
-                    game->fuels[i].active = false;
-                }
-
-                if (game->currentState == PLAYING && CheckCollisionRecs(game->player.rect, game->fuels[i].rect)) {
-                    PlayFuelSound();
-                    game->fuel += 35.0f;
-                    if (game->fuel > 100.0f) game->fuel = 100.0f;
-                    game->fuels[i].active = false;
-                    game->floatScore += 500.0f;
-                    if ((int)game->floatScore > game->highScore) {
-                        game->highScore = (int)game->floatScore;
+                    if (game->invisibleTimer <= 0.0f) {
+                        PlayBreakSound();
+                        game->currentState = SKIDDING;
+                        game->player.skidTimer = 0.9f;
+                        game->player.skidDirection = (game->player.rect.x < game->enemies[i].rect.x) ? -1 : 1;
                     }
                 }
             }
-        }
-    } else if (game->currentState == GAME_OVER) {
-        if (IsKeyPressed(KEY_ENTER)) {
-            StopPoliceSirenSound();
-            StopAmbulanceSirenSound();
-            
-            char nameBuf[32];
-            strcpy(nameBuf, game->playerName);
-            int hs = game->highScore;
-            int att = game->attempts;
-
-            InitGame(game);
-
-            strcpy(game->playerName, nameBuf);
-            game->highScore = hs;
-            game->attempts = att;
-            game->attempts++;
-            game->currentState = PLAYING;
-            SaveUserDataToCSV(game);
-            PlayBGM();
         }
     }
 }

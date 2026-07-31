@@ -15,11 +15,13 @@ int main(void) {
     while (!WindowShouldClose() && !game.exitRequested) {
         float dt = GetFrameTime();
 
+        // Update audio every frame so menu BGM streams properly
+        UpdateAudio(&game, dt);
+
         if (game.currentState == MENU) {
             UpdateMenuLogic(&game);
             DrawMenuScreen(&game);
         } else {
-            UpdateAudio(&game, dt);
             UpdateGame(&game, dt);
             RenderGame(&game);
         }

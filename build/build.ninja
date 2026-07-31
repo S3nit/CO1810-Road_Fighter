@@ -34,7 +34,7 @@ include CMakeFiles/rules.ninja
 #############################################
 # Logical path to working directory; prefix for absolute paths.
 
-cmake_ninja_workdir = C$:/Users/S3nit/OneDrive/Desktop/GAME-main/Car$ Fighter/build/
+cmake_ninja_workdir = F$:/Programming/C$ programming/Final$ Project/Car$ Fighter/CO1810-Road_Fighter/build/
 # =============================================================================
 # Object build statements for EXECUTABLE target game
 
@@ -44,34 +44,34 @@ cmake_ninja_workdir = C$:/Users/S3nit/OneDrive/Desktop/GAME-main/Car$ Fighter/bu
 
 build cmake_object_order_depends_target_game: phony || .
 
-build CMakeFiles/game.dir/main.c.obj: C_COMPILER__game_unscanned_ C$:/Users/S3nit/OneDrive/Desktop/GAME-main/Car$ Fighter/main.c || cmake_object_order_depends_target_game
+build CMakeFiles/game.dir/main.c.obj: C_COMPILER__game_unscanned_ F$:/Programming/C$ programming/Final$ Project/Car$ Fighter/CO1810-Road_Fighter/main.c || cmake_object_order_depends_target_game
   DEP_FILE = CMakeFiles\game.dir\main.c.obj.d
   FLAGS = -std=gnu99
-  INCLUDES = -I"C:/Users/S3nit/OneDrive/Desktop/GAME-main/Car Fighter/."
+  INCLUDES = -I"F:/Programming/C programming/Final Project/Car Fighter/CO1810-Road_Fighter/."
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
-build CMakeFiles/game.dir/game.c.obj: C_COMPILER__game_unscanned_ C$:/Users/S3nit/OneDrive/Desktop/GAME-main/Car$ Fighter/game.c || cmake_object_order_depends_target_game
+build CMakeFiles/game.dir/game.c.obj: C_COMPILER__game_unscanned_ F$:/Programming/C$ programming/Final$ Project/Car$ Fighter/CO1810-Road_Fighter/game.c || cmake_object_order_depends_target_game
   DEP_FILE = CMakeFiles\game.dir\game.c.obj.d
   FLAGS = -std=gnu99
-  INCLUDES = -I"C:/Users/S3nit/OneDrive/Desktop/GAME-main/Car Fighter/."
+  INCLUDES = -I"F:/Programming/C programming/Final Project/Car Fighter/CO1810-Road_Fighter/."
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
-build CMakeFiles/game.dir/ui.c.obj: C_COMPILER__game_unscanned_ C$:/Users/S3nit/OneDrive/Desktop/GAME-main/Car$ Fighter/ui.c || cmake_object_order_depends_target_game
+build CMakeFiles/game.dir/ui.c.obj: C_COMPILER__game_unscanned_ F$:/Programming/C$ programming/Final$ Project/Car$ Fighter/CO1810-Road_Fighter/ui.c || cmake_object_order_depends_target_game
   DEP_FILE = CMakeFiles\game.dir\ui.c.obj.d
   FLAGS = -std=gnu99
-  INCLUDES = -I"C:/Users/S3nit/OneDrive/Desktop/GAME-main/Car Fighter/."
+  INCLUDES = -I"F:/Programming/C programming/Final Project/Car Fighter/CO1810-Road_Fighter/."
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
 
-build CMakeFiles/game.dir/audiomanager.c.obj: C_COMPILER__game_unscanned_ C$:/Users/S3nit/OneDrive/Desktop/GAME-main/Car$ Fighter/audiomanager.c || cmake_object_order_depends_target_game
+build CMakeFiles/game.dir/audiomanager.c.obj: C_COMPILER__game_unscanned_ F$:/Programming/C$ programming/Final$ Project/Car$ Fighter/CO1810-Road_Fighter/audiomanager.c || cmake_object_order_depends_target_game
   DEP_FILE = CMakeFiles\game.dir\audiomanager.c.obj.d
   FLAGS = -std=gnu99
-  INCLUDES = -I"C:/Users/S3nit/OneDrive/Desktop/GAME-main/Car Fighter/."
+  INCLUDES = -I"F:/Programming/C programming/Final Project/Car Fighter/CO1810-Road_Fighter/."
   OBJECT_DIR = CMakeFiles\game.dir
   OBJECT_FILE_DIR = CMakeFiles\game.dir
   TARGET_SUPPORT_DIR = CMakeFiles\game.dir
@@ -84,8 +84,8 @@ build CMakeFiles/game.dir/audiomanager.c.obj: C_COMPILER__game_unscanned_ C$:/Us
 #############################################
 # Link the executable game.exe
 
-build game.exe: C_EXECUTABLE_LINKER__game_ CMakeFiles/game.dir/main.c.obj CMakeFiles/game.dir/game.c.obj CMakeFiles/game.dir/ui.c.obj CMakeFiles/game.dir/audiomanager.c.obj | C$:/Users/S3nit/OneDrive/Desktop/GAME-main/Car$ Fighter/libraylib.a
-  LINK_LIBRARIES = "C:/Users/S3nit/OneDrive/Desktop/GAME-main/Car Fighter/libraylib.a"  -lopengl32  -lgdi32  -lwinmm  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+build game.exe: C_EXECUTABLE_LINKER__game_ CMakeFiles/game.dir/main.c.obj CMakeFiles/game.dir/game.c.obj CMakeFiles/game.dir/ui.c.obj CMakeFiles/game.dir/audiomanager.c.obj | F$:/Programming/C$ programming/Final$ Project/Car$ Fighter/CO1810-Road_Fighter/libraylib.a
+  LINK_LIBRARIES = "F:/Programming/C programming/Final Project/Car Fighter/CO1810-Road_Fighter/libraylib.a"  -lopengl32  -lgdi32  -lwinmm  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\game.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
@@ -99,7 +99,7 @@ build game.exe: C_EXECUTABLE_LINKER__game_ CMakeFiles/game.dir/main.c.obj CMakeF
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = C:\Windows\system32\cmd.exe /C "cd /D "C:\Users\S3nit\OneDrive\Desktop\GAME-main\Car Fighter\build" && C:\w64devkit\bin\ccmake.exe -S"C:\Users\S3nit\OneDrive\Desktop\GAME-main\Car Fighter" -B"C:\Users\S3nit\OneDrive\Desktop\GAME-main\Car Fighter\build""
+  COMMAND = C:\Windows\system32\cmd.exe /C "cd /D "F:\Programming\C programming\Final Project\Car Fighter\CO1810-Road_Fighter\build" && C:\w64devkit\bin\ccmake.exe -S"F:\Programming\C programming\Final Project\Car Fighter\CO1810-Road_Fighter" -B"F:\Programming\C programming\Final Project\Car Fighter\CO1810-Road_Fighter\build""
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -111,7 +111,7 @@ build edit_cache: phony CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = C:\Windows\system32\cmd.exe /C "cd /D "C:\Users\S3nit\OneDrive\Desktop\GAME-main\Car Fighter\build" && C:\w64devkit\bin\cmake.exe --regenerate-during-build -S"C:\Users\S3nit\OneDrive\Desktop\GAME-main\Car Fighter" -B"C:\Users\S3nit\OneDrive\Desktop\GAME-main\Car Fighter\build""
+  COMMAND = C:\Windows\system32\cmd.exe /C "cd /D "F:\Programming\C programming\Final Project\Car Fighter\CO1810-Road_Fighter\build" && C:\w64devkit\bin\cmake.exe --regenerate-during-build -S"F:\Programming\C programming\Final Project\Car Fighter\CO1810-Road_Fighter" -B"F:\Programming\C programming\Final Project\Car Fighter\CO1810-Road_Fighter\build""
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -129,7 +129,7 @@ build game: phony game.exe
 # =============================================================================
 
 #############################################
-# Folder: C:/Users/S3nit/OneDrive/Desktop/GAME-main/Car Fighter/build
+# Folder: F:/Programming/C programming/Final Project/Car Fighter/CO1810-Road_Fighter/build
 
 build all: phony game.exe
 
@@ -140,14 +140,14 @@ build all: phony game.exe
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja C$:/Users/S3nit/OneDrive/Desktop/GAME-main/Car$ Fighter/build/cmake_install.cmake: RERUN_CMAKE | C$:/Users/S3nit/OneDrive/Desktop/GAME-main/Car$ Fighter/CMakeLists.txt C$:/w64devkit/share/cmake-4.4/Modules/CMakeCInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeCommonLanguageInclude.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeGenericSystem.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeInitializeConfigs.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeLanguageInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeRCInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeSystemSpecificInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeSystemSpecificInitialize.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Internal/CMakeCLinkerInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/Internal/CMakeCommonLinkerInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/Linker/GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Linker/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-Initialize.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-windres.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/4.4.0/CMakeCCompiler.cmake CMakeFiles/4.4.0/CMakeRCCompiler.cmake CMakeFiles/4.4.0/CMakeSystem.cmake
+build build.ninja F$:/Programming/C$ programming/Final$ Project/Car$ Fighter/CO1810-Road_Fighter/build/cmake_install.cmake: RERUN_CMAKE | C$:/w64devkit/share/cmake-4.4/Modules/CMakeCInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeCommonLanguageInclude.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeGenericSystem.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeInitializeConfigs.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeLanguageInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeRCInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeSystemSpecificInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeSystemSpecificInitialize.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Internal/CMakeCLinkerInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/Internal/CMakeCommonLinkerInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/Linker/GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Linker/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-Initialize.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-windres.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/4.4.0/CMakeCCompiler.cmake CMakeFiles/4.4.0/CMakeRCCompiler.cmake CMakeFiles/4.4.0/CMakeSystem.cmake F$:/Programming/C$ programming/Final$ Project/Car$ Fighter/CO1810-Road_Fighter/CMakeLists.txt
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build C$:/Users/S3nit/OneDrive/Desktop/GAME-main/Car$ Fighter/CMakeLists.txt C$:/w64devkit/share/cmake-4.4/Modules/CMakeCInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeCommonLanguageInclude.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeGenericSystem.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeInitializeConfigs.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeLanguageInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeRCInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeSystemSpecificInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeSystemSpecificInitialize.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Internal/CMakeCLinkerInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/Internal/CMakeCommonLinkerInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/Linker/GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Linker/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-Initialize.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-windres.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/4.4.0/CMakeCCompiler.cmake CMakeFiles/4.4.0/CMakeRCCompiler.cmake CMakeFiles/4.4.0/CMakeSystem.cmake: phony
+build C$:/w64devkit/share/cmake-4.4/Modules/CMakeCInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeCommonLanguageInclude.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeGenericSystem.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeInitializeConfigs.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeLanguageInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeRCInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeSystemSpecificInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/CMakeSystemSpecificInitialize.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Compiler/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Internal/CMakeCLinkerInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/Internal/CMakeCommonLinkerInformation.cmake C$:/w64devkit/share/cmake-4.4/Modules/Linker/GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Linker/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Linker/Windows-GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU-C.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-GNU.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-Initialize.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows-windres.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/Windows.cmake C$:/w64devkit/share/cmake-4.4/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/4.4.0/CMakeCCompiler.cmake CMakeFiles/4.4.0/CMakeRCCompiler.cmake CMakeFiles/4.4.0/CMakeSystem.cmake F$:/Programming/C$ programming/Final$ Project/Car$ Fighter/CO1810-Road_Fighter/CMakeLists.txt: phony
 
 
 #############################################

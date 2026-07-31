@@ -41,7 +41,8 @@ typedef enum {
     MENU_STATE_SETTINGS,
     MENU_STATE_PROFILE,
     MENU_STATE_AUDIO,
-    MENU_STATE_NAME_INPUT
+    MENU_STATE_NAME_INPUT,
+    MENU_STATE_EXIT_CONFIRM
 } MenuState;
 
 static MenuState currentMenuState = MENU_STATE_MAIN;
@@ -49,12 +50,21 @@ static int mainSelectedOption = 0;
 static int settingsSelectedOption = 0;   
 static int profileSelectedOption = 0;    
 static int audioSelectedOption = 0;      
+static int exitConfirmOption = 1;        // 0: Yes, 1: No
 static int masterVolumePercent = 80;     
+static int pauseSelectedOption = 0;      // 0: Resume, 1: Exit to Menu
+
+// Track previous options for hover sound triggers
+static int prevMainSelected = 0;
+static int prevSettingsSelected = 0;
+static int prevAudioSelected = 0;
+static int prevExitConfirmSelected = 1;
 
 void UpdateMenuLogic(GameContext *game) {
     Vector2 mousePos = GetMousePosition();
 
     if (currentMenuState == MENU_STATE_MAIN) {
+        prevMainSelected = mainSelectedOption;
         if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
             mainSelectedOption = (mainSelectedOption + 1) % 4;
         }
@@ -70,6 +80,7 @@ void UpdateMenuLogic(GameContext *game) {
         if (CheckCollisionPointRec(mousePos, btnStart)) {
             mainSelectedOption = 0;
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
                 currentMenuState = MENU_STATE_NAME_INPUT;
                 game->editingName = true;
                 if (game->playerName[0] == '\0') {
@@ -79,22 +90,31 @@ void UpdateMenuLogic(GameContext *game) {
         } else if (CheckCollisionPointRec(mousePos, btnInstr)) {
             mainSelectedOption = 1;
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
                 currentMenuState = MENU_STATE_INSTRUCTIONS;
             }
         } else if (CheckCollisionPointRec(mousePos, btnSett)) {
             mainSelectedOption = 2;
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
                 currentMenuState = MENU_STATE_SETTINGS;
                 settingsSelectedOption = 0;
             }
         } else if (CheckCollisionPointRec(mousePos, btnExit)) {
             mainSelectedOption = 3;
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                game->exitRequested = true;
+                PlayMenuSelectSound();
+                currentMenuState = MENU_STATE_EXIT_CONFIRM;
+                exitConfirmOption = 1; // Default to 'No'
             }
         }
 
+        if (mainSelectedOption != prevMainSelected) {
+            PlayButtonHoverSound();
+        }
+
         if (IsKeyPressed(KEY_ENTER)) {
+            PlayMenuSelectSound();
             if (mainSelectedOption == 0) {
                 currentMenuState = MENU_STATE_NAME_INPUT;
                 game->editingName = true;
@@ -107,10 +127,51 @@ void UpdateMenuLogic(GameContext *game) {
                 currentMenuState = MENU_STATE_SETTINGS;
                 settingsSelectedOption = 0;
             } else if (mainSelectedOption == 3) {
-                game->exitRequested = true;
+                currentMenuState = MENU_STATE_EXIT_CONFIRM;
+                exitConfirmOption = 1;
             }
         }
-    } 
+    }
+    else if (currentMenuState == MENU_STATE_EXIT_CONFIRM) {
+        prevExitConfirmSelected = exitConfirmOption;
+        if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_D)) {
+            exitConfirmOption = 1 - exitConfirmOption;
+        }
+
+        Rectangle btnYes = { SCREEN_WIDTH / 2.0f - 110.0f, 305.0f, 90.0f, 36.0f };
+        Rectangle btnNo  = { SCREEN_WIDTH / 2.0f + 20.0f,  305.0f, 90.0f, 36.0f };
+
+        if (CheckCollisionPointRec(mousePos, btnYes)) {
+            exitConfirmOption = 0;
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
+                game->exitRequested = true;
+            }
+        } else if (CheckCollisionPointRec(mousePos, btnNo)) {
+            exitConfirmOption = 1;
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
+                currentMenuState = MENU_STATE_MAIN;
+            }
+        }
+
+        if (exitConfirmOption != prevExitConfirmSelected) {
+            PlayButtonHoverSound();
+        }
+
+        if (IsKeyPressed(KEY_ENTER)) {
+            PlayMenuSelectSound();
+            if (exitConfirmOption == 0) {
+                game->exitRequested = true;
+            } else {
+                currentMenuState = MENU_STATE_MAIN;
+            }
+        }
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            PlayMenuSelectSound();
+            currentMenuState = MENU_STATE_MAIN;
+        }
+    }
     else if (currentMenuState == MENU_STATE_NAME_INPUT) {
         int key = GetCharPressed();
         while (key > 0) {
@@ -128,6 +189,7 @@ void UpdateMenuLogic(GameContext *game) {
             }
         }
         if (IsKeyPressed(KEY_ENTER)) {
+            PlayMenuSelectSound();
             game->editingName = false;
             LoadUserDataFromCSV(game);
             game->attempts++;
@@ -135,11 +197,13 @@ void UpdateMenuLogic(GameContext *game) {
 
             game->currentState = PLAYING;
             currentMenuState = MENU_STATE_MAIN;
+            StopMenuBGM();
             PlayBGM();
         }
 
         Rectangle startBtn = { (SCREEN_WIDTH - 200.0f) / 2.0f, 355.0f, 200.0f, 40.0f };
         if (CheckCollisionPointRec(mousePos, startBtn) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            PlayMenuSelectSound();
             game->editingName = false;
             LoadUserDataFromCSV(game);
             game->attempts++;
@@ -147,19 +211,23 @@ void UpdateMenuLogic(GameContext *game) {
 
             game->currentState = PLAYING;
             currentMenuState = MENU_STATE_MAIN;
+            StopMenuBGM();
             PlayBGM();
         }
     }
     else if (currentMenuState == MENU_STATE_INSTRUCTIONS) {
         if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE)) {
+            PlayMenuSelectSound();
             currentMenuState = MENU_STATE_MAIN;
         }
-        Rectangle backBtn = { (SCREEN_WIDTH - 200.0f) / 2.0f, 480.0f, 200.0f, 42.0f };
+        Rectangle backBtn = { (SCREEN_WIDTH - 200.0f) / 2.0f, 495.0f, 200.0f, 42.0f };
         if (CheckCollisionPointRec(mousePos, backBtn) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            PlayMenuSelectSound();
             currentMenuState = MENU_STATE_MAIN;
         }
     }
     else if (currentMenuState == MENU_STATE_SETTINGS) {
+        prevSettingsSelected = settingsSelectedOption;
         if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S)) {
             settingsSelectedOption = (settingsSelectedOption + 1) % 3;
         }
@@ -174,23 +242,31 @@ void UpdateMenuLogic(GameContext *game) {
         if (CheckCollisionPointRec(mousePos, btnProfile)) {
             settingsSelectedOption = 0;
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
                 currentMenuState = MENU_STATE_PROFILE;
                 profileSelectedOption = 0;
             }
         } else if (CheckCollisionPointRec(mousePos, btnAudio)) {
             settingsSelectedOption = 1;
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
                 currentMenuState = MENU_STATE_AUDIO;
                 audioSelectedOption = 0;
             }
         } else if (CheckCollisionPointRec(mousePos, btnBack)) {
             settingsSelectedOption = 2;
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
                 currentMenuState = MENU_STATE_MAIN;
             }
         }
 
+        if (settingsSelectedOption != prevSettingsSelected) {
+            PlayButtonHoverSound();
+        }
+
         if (IsKeyPressed(KEY_ENTER)) {
+            PlayMenuSelectSound();
             if (settingsSelectedOption == 0) {
                 currentMenuState = MENU_STATE_PROFILE;
                 profileSelectedOption = 0;
@@ -202,6 +278,7 @@ void UpdateMenuLogic(GameContext *game) {
             }
         }
         if (IsKeyPressed(KEY_ESCAPE)) {
+            PlayMenuSelectSound();
             currentMenuState = MENU_STATE_MAIN;
         }
     }
@@ -223,29 +300,35 @@ void UpdateMenuLogic(GameContext *game) {
                 }
             }
             if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE)) {
+                PlayMenuSelectSound();
                 game->editingName = false;
                 SaveUserDataToCSV(game);
             }
         } else {
             if (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_ENTER)) {
+                PlayMenuSelectSound();
                 game->editingName = true;
             }
             Rectangle nameRect = { 48.0f, 175.0f, 250.0f, 25.0f };
             if (CheckCollisionPointRec(mousePos, nameRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
                 game->editingName = true;
             }
         }
 
         Rectangle backBtn = { (SCREEN_WIDTH - 200.0f) / 2.0f, 480.0f, 200.0f, 40.0f };
         if (CheckCollisionPointRec(mousePos, backBtn) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            PlayMenuSelectSound();
             game->editingName = false;
             currentMenuState = MENU_STATE_SETTINGS;
         }
         if (IsKeyPressed(KEY_ESCAPE) && !game->editingName) {
+            PlayMenuSelectSound();
             currentMenuState = MENU_STATE_SETTINGS;
         }
     }
     else if (currentMenuState == MENU_STATE_AUDIO) {
+        prevAudioSelected = audioSelectedOption;
         if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S) || IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
             audioSelectedOption = (audioSelectedOption + 1) % 2;
         }
@@ -258,18 +341,25 @@ void UpdateMenuLogic(GameContext *game) {
             }
         }
 
+        if (audioSelectedOption != prevAudioSelected) {
+            PlayButtonHoverSound();
+        }
+
         Rectangle btnBack = { (SCREEN_WIDTH - 260.0f) / 2.0f, 450.0f, 260.0f, 44.0f };
         if (CheckCollisionPointRec(mousePos, btnBack)) {
             audioSelectedOption = 1;
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
                 currentMenuState = MENU_STATE_SETTINGS;
             }
         }
 
         if (IsKeyPressed(KEY_ENTER) && audioSelectedOption == 1) {
+            PlayMenuSelectSound();
             currentMenuState = MENU_STATE_SETTINGS;
         }
         if (IsKeyPressed(KEY_ESCAPE)) {
+            PlayMenuSelectSound();
             currentMenuState = MENU_STATE_SETTINGS;
         }
     }
@@ -340,6 +430,22 @@ void DrawMenuScreen(const GameContext *game) {
         DrawCapsuleButton(btnSett,  "SETTINGS",     mainSelectedOption == 2);
         DrawCapsuleButton(btnExit,  "EXIT GAME",    mainSelectedOption == 3);
     }
+    else if (currentMenuState == MENU_STATE_EXIT_CONFIRM) {
+        Rectangle exitBox = { 30, 180, SCREEN_WIDTH - 60, 200 };
+        DrawRectangleRounded(exitBox, 0.12f, 6, (Color){ 18, 22, 30, 240 });
+        DrawRectangleRoundedLines(exitBox, 0.12f, 6, (Color){ 231, 76, 60, 255 });
+
+        DrawCustomText("EXIT CONFIRMATION", (Vector2){ 48.0f, 200.0f }, 12.0f, 1.0f, (Color){ 231, 76, 60, 255 });
+        DrawLine(48, 218, SCREEN_WIDTH - 48, 218, Fade(WHITE, 0.1f));
+
+        DrawCustomText("Do you want to leave?", (Vector2){ SCREEN_WIDTH / 2.0f - MeasureCustomText("Do you want to leave?", 12.0f, 1.0f).x / 2.0f, 250.0f }, 12.0f, 1.0f, WHITE);
+
+        Rectangle btnYes = { SCREEN_WIDTH / 2.0f - 110.0f, 305.0f, 90.0f, 36.0f };
+        Rectangle btnNo  = { SCREEN_WIDTH / 2.0f + 20.0f,  305.0f, 90.0f, 36.0f };
+
+        DrawCapsuleButton(btnYes, "YES", exitConfirmOption == 0);
+        DrawCapsuleButton(btnNo,  "NO",  exitConfirmOption == 1);
+    }
     else if (currentMenuState == MENU_STATE_NAME_INPUT) {
         Rectangle nameBox = { 30, 140, SCREEN_WIDTH - 60, 280 };
         DrawRectangleRounded(nameBox, 0.08f, 6, (Color){ 18, 22, 30, 240 });
@@ -362,29 +468,35 @@ void DrawMenuScreen(const GameContext *game) {
         DrawCapsuleButton(startBtn, "START RACE", true);
     }
     else if (currentMenuState == MENU_STATE_INSTRUCTIONS) {
-        Rectangle instrBox = { 30, 120, SCREEN_WIDTH - 60, 340 };
+        Rectangle instrBox = { 30, 115, SCREEN_WIDTH - 60, 365 };
         DrawRectangleRounded(instrBox, 0.08f, 6, (Color){ 18, 22, 30, 240 });
         DrawRectangleRoundedLines(instrBox, 0.08f, 6, (Color){ 45, 65, 95, 255 });
 
-        DrawCustomText("DRIVER MANUAL", (Vector2){ 48.0f, 138.0f }, 12.0f, 1.0f, (Color){ 0, 200, 255, 255 });
-        DrawLine(48, 154, SCREEN_WIDTH - 48, 154, Fade(WHITE, 0.1f));
+        DrawCustomText("DRIVER MANUAL", (Vector2){ 48.0f, 132.0f }, 12.0f, 1.0f, (Color){ 0, 200, 255, 255 });
+        DrawLine(48, 148, SCREEN_WIDTH - 48, 148, Fade(WHITE, 0.1f));
 
-        DrawCustomText("A / D or Arrows", (Vector2){ 48.0f, 175.0f }, 11.0f, 1.0f, (Color){ 140, 155, 175, 255 });
-        DrawCustomText("Steer Vehicle", (Vector2){ 185.0f, 175.0f }, 11.0f, 1.0f, WHITE);
+        DrawCustomText("A / D or Arrows", (Vector2){ 48.0f, 165.0f }, 11.0f, 1.0f, (Color){ 140, 155, 175, 255 });
+        DrawCustomText("Steer Vehicle", (Vector2){ 185.0f, 165.0f }, 11.0f, 1.0f, WHITE);
 
-        DrawCustomText("UP / DOWN", (Vector2){ 48.0f, 205.0f }, 11.0f, 1.0f, (Color){ 140, 155, 175, 255 });
-        DrawCustomText("Speed Control", (Vector2){ 185.0f, 205.0f }, 11.0f, 1.0f, WHITE);
+        DrawCustomText("UP / DOWN", (Vector2){ 48.0f, 192.0f }, 11.0f, 1.0f, (Color){ 140, 155, 175, 255 });
+        DrawCustomText("Speed Control", (Vector2){ 185.0f, 192.0f }, 11.0f, 1.0f, WHITE);
 
-        DrawCustomText("P Key", (Vector2){ 48.0f, 235.0f }, 11.0f, 1.0f, (Color){ 140, 155, 175, 255 });
-        DrawCustomText("Request Police Escort", (Vector2){ 185.0f, 235.0f }, 11.0f, 1.0f, (Color){ 100, 180, 255, 255 });
+        DrawCustomText("P Key", (Vector2){ 48.0f, 219.0f }, 11.0f, 1.0f, (Color){ 140, 155, 175, 255 });
+        DrawCustomText("Request Police Escort", (Vector2){ 185.0f, 219.0f }, 11.0f, 1.0f, (Color){ 100, 180, 255, 255 });
 
-        DrawCustomText("Pink Fuel Items", (Vector2){ 48.0f, 265.0f }, 11.0f, 1.0f, (Color){ 140, 155, 175, 255 });
-        DrawCustomText("Replenish Gas Supply", (Vector2){ 185.0f, 265.0f }, 11.0f, 1.0f, (Color){ 240, 100, 240, 255 });
+        DrawCustomText("Pink Fuel [ F ]", (Vector2){ 48.0f, 246.0f }, 11.0f, 1.0f, (Color){ 240, 80, 160, 255 });
+        DrawCustomText("Replenish Gas Supply", (Vector2){ 185.0f, 246.0f }, 11.0f, 1.0f, (Color){ 240, 80, 160, 255 });
 
-        DrawCustomText("Avoid Traffic", (Vector2){ 48.0f, 295.0f }, 11.0f, 1.0f, (Color){ 140, 155, 175, 255 });
-        DrawCustomText("Prevent Collisions", (Vector2){ 185.0f, 295.0f }, 11.0f, 1.0f, (Color){ 231, 76, 60, 255 });
+        DrawCustomText("Blue Nitro [ N ]", (Vector2){ 48.0f, 273.0f }, 11.0f, 1.0f, (Color){ 0, 180, 255, 255 });
+        DrawCustomText("Super Speed Boost", (Vector2){ 185.0f, 273.0f }, 11.0f, 1.0f, (Color){ 0, 180, 255, 255 });
 
-        Rectangle backBtn = { (SCREEN_WIDTH - 200.0f) / 2.0f, 480.0f, 200.0f, 40.0f };
+        DrawCustomText("Green Stealth [ I ]", (Vector2){ 48.0f, 300.0f }, 11.0f, 1.0f, (Color){ 46, 204, 113, 255 });
+        DrawCustomText("Ghost Invisibility", (Vector2){ 185.0f, 300.0f }, 11.0f, 1.0f, (Color){ 46, 204, 113, 255 });
+
+        DrawCustomText("Avoid Traffic", (Vector2){ 48.0f, 327.0f }, 11.0f, 1.0f, (Color){ 140, 155, 175, 255 });
+        DrawCustomText("Prevent Collisions", (Vector2){ 185.0f, 327.0f }, 11.0f, 1.0f, (Color){ 231, 76, 60, 255 });
+
+        Rectangle backBtn = { (SCREEN_WIDTH - 200.0f) / 2.0f, 495.0f, 200.0f, 40.0f };
         DrawCapsuleButton(backBtn, "BACK TO MENU", true);
     }
     else if (currentMenuState == MENU_STATE_SETTINGS) {
@@ -470,7 +582,14 @@ static void DrawPlayerCar(const GameContext *game) {
     float w = rect.width;
     float h = rect.height;
 
-    Color beamColor = Fade((Color){ 255, 245, 200, 255 }, 0.15f);
+    // --- INVISIBILITY OPACITY & BLINK EFFECT ---
+    float alphaMult = 1.0f;
+    if (game->invisibleTimer > 0.0f) {
+        bool blink = ((int)(GetTime() * 14.0f) % 2 == 0);
+        alphaMult = blink ? 0.25f : 0.55f;
+    }
+
+    Color beamColor = Fade((Color){ 255, 245, 200, 255 }, 0.15f * alphaMult);
     Vector2 leftHeadlight = { x + 6.0f, y + 2.0f };
     Vector2 rightHeadlight = { x + w - 6.0f, y + 2.0f };
 
@@ -479,7 +598,7 @@ static void DrawPlayerCar(const GameContext *game) {
 
     bool isBraking = IsKeyDown(KEY_DOWN) && game->currentState == PLAYING;
     if (isBraking) {
-        Color brakeBloom = Fade((Color){ 255, 30, 30, 255 }, 0.35f);
+        Color brakeBloom = Fade((Color){ 255, 30, 30, 255 }, 0.35f * alphaMult);
         DrawCircleGradient((Vector2){ x + 6.0f, y + h + 4.0f }, 16.0f, brakeBloom, BLANK);
         DrawCircleGradient((Vector2){ x + w - 6.0f, y + h + 4.0f }, 16.0f, brakeBloom, BLANK);
     }
@@ -488,38 +607,42 @@ static void DrawPlayerCar(const GameContext *game) {
     float wheelW = 5.0f;
     float wheelH = 11.0f;
 
-    DrawRectangleRounded((Rectangle){ x - wheelW + 1.0f + steerOffset, y + 8.0f, wheelW, wheelH }, 0.4f, 2, COLOR_WHEEL);
-    DrawRectangleRounded((Rectangle){ x + w - 1.0f + steerOffset, y + 8.0f, wheelW, wheelH }, 0.4f, 2, COLOR_WHEEL);
-    DrawRectangleRounded((Rectangle){ x - wheelW - 1.0f, y + h - 18.0f, wheelW + 1.0f, wheelH + 1.0f }, 0.4f, 2, COLOR_WHEEL);
-    DrawRectangleRounded((Rectangle){ x + w, y + h - 18.0f, wheelW + 1.0f, wheelH + 1.0f }, 0.4f, 2, COLOR_WHEEL);
+    Color wheelColor = Fade(COLOR_WHEEL, alphaMult);
+    DrawRectangleRounded((Rectangle){ x - wheelW + 1.0f + steerOffset, y + 8.0f, wheelW, wheelH }, 0.4f, 2, wheelColor);
+    DrawRectangleRounded((Rectangle){ x + w - 1.0f + steerOffset, y + 8.0f, wheelW, wheelH }, 0.4f, 2, wheelColor);
+    DrawRectangleRounded((Rectangle){ x - wheelW - 1.0f, y + h - 18.0f, wheelW + 1.0f, wheelH + 1.0f }, 0.4f, 2, wheelColor);
+    DrawRectangleRounded((Rectangle){ x + w, y + h - 18.0f, wheelW + 1.0f, wheelH + 1.0f }, 0.4f, 2, wheelColor);
 
-    DrawRectangleRounded((Rectangle){ x + 2.0f, y + 5.0f, w, h }, 0.3f, 4, (Color){ 0, 0, 0, 100 });
+    DrawRectangleRounded((Rectangle){ x + 2.0f, y + 5.0f, w, h }, 0.3f, 4, Fade((Color){ 0, 0, 0, 100 }, alphaMult));
 
     Color bodyColor = player->color;
     if (game->currentState == SKIDDING && ((int)(GetTime() * 12) % 2 == 0)) {
         bodyColor = WHITE;
     }
+    bodyColor = Fade(bodyColor, alphaMult);
 
     DrawRectangleRounded((Rectangle){ x - 2.0f, y + h * 0.50f, w + 4.0f, h * 0.42f }, 0.4f, 4, bodyColor);
     DrawRectangleRounded(rect, 0.35f, 6, bodyColor);
-    DrawTriangle((Vector2){ x + 1.0f, y + 6.0f }, (Vector2){ x + w / 2.0f, y - 2.0f }, (Vector2){ x + w - 1.0f, y + 6.0f }, (Color){ 18, 20, 25, 255 });
-    DrawTriangle((Vector2){ x + w / 2.0f - 5.0f, y + 16.0f }, (Vector2){ x + w / 2.0f + 5.0f, y + 16.0f }, (Vector2){ x + w / 2.0f, y + 24.0f }, (Color){ 20, 22, 28, 255 });
+    DrawTriangle((Vector2){ x + 1.0f, y + 6.0f }, (Vector2){ x + w / 2.0f, y - 2.0f }, (Vector2){ x + w - 1.0f, y + 6.0f }, Fade((Color){ 18, 20, 25, 255 }, alphaMult));
+    DrawTriangle((Vector2){ x + w / 2.0f - 5.0f, y + 16.0f }, (Vector2){ x + w / 2.0f + 5.0f, y + 16.0f }, (Vector2){ x + w / 2.0f, y + 24.0f }, Fade((Color){ 20, 22, 28, 255 }, alphaMult));
 
-    DrawTriangle((Vector2){ x + 5.0f, y + h * 0.36f }, (Vector2){ x + w / 2.0f, y + h * 0.22f }, (Vector2){ x + w - 5.0f, y + h * 0.36f }, COLOR_GLASS);
-    DrawRectangle((int)(x + 5.0f), (int)(y + h * 0.36f), (int)(w - 10.0f), (int)(h * 0.12f), COLOR_GLASS);
+    Color glassColor = Fade(COLOR_GLASS, alphaMult);
+    DrawTriangle((Vector2){ x + 5.0f, y + h * 0.36f }, (Vector2){ x + w / 2.0f, y + h * 0.22f }, (Vector2){ x + w - 5.0f, y + h * 0.36f }, glassColor);
+    DrawRectangle((int)(x + 5.0f), (int)(y + h * 0.36f), (int)(w - 10.0f), (int)(h * 0.12f), glassColor);
 
     Rectangle carbonRoof = { x + 6.0f, y + h * 0.42f, w - 12.0f, h * 0.22f };
-    DrawRectangleRounded(carbonRoof, 0.3f, 4, (Color){ 22, 24, 30, 255 });
-    DrawRectangleRounded((Rectangle){ x + 7.0f, y + h * 0.62f, w - 14.0f, h * 0.10f }, 0.3f, 2, COLOR_GLASS);
+    DrawRectangleRounded(carbonRoof, 0.3f, 4, Fade((Color){ 22, 24, 30, 255 }, alphaMult));
+    DrawRectangleRounded((Rectangle){ x + 7.0f, y + h * 0.62f, w - 14.0f, h * 0.10f }, 0.3f, 2, glassColor);
 
-    DrawRectangleRounded((Rectangle){ x - 3.0f, y + h - 6.0f, w + 6.0f, 5.0f }, 0.5f, 2, (Color){ 15, 17, 22, 255 });
+    DrawRectangleRounded((Rectangle){ x - 3.0f, y + h - 6.0f, w + 6.0f, 5.0f }, 0.5f, 2, Fade((Color){ 15, 17, 22, 255 }, alphaMult));
     DrawRectangle((int)(x - 4.0f), (int)(y + h - 8.0f), 3, 8, bodyColor);
     DrawRectangle((int)(x + w + 1.0f), (int)(y + h - 8.0f), 3, 8, bodyColor);
 
-    DrawLineEx((Vector2){ x + 3.0f, y + 6.0f }, (Vector2){ x + 9.0f, y + 2.0f }, 2.0f, WHITE);
-    DrawLineEx((Vector2){ x + w - 3.0f, y + 6.0f }, (Vector2){ x + w - 9.0f, y + 2.0f }, 2.0f, WHITE);
+    DrawLineEx((Vector2){ x + 3.0f, y + 6.0f }, (Vector2){ x + 9.0f, y + 2.0f }, 2.0f, Fade(WHITE, alphaMult));
+    DrawLineEx((Vector2){ x + w - 3.0f, y + 6.0f }, (Vector2){ x + w - 9.0f, y + 2.0f }, 2.0f, Fade(WHITE, alphaMult));
 
     Color tailColor = isBraking ? (Color){ 255, 40, 40, 255 } : (Color){ 200, 25, 25, 255 };
+    tailColor = Fade(tailColor, alphaMult);
     DrawRectangleRounded((Rectangle){ x + 1.0f, y + h - 2.0f, w - 2.0f, 3.0f }, 0.5f, 2, tailColor);
 }
 
@@ -648,6 +771,7 @@ static void DrawAmbulanceShape(Rectangle rect) {
     DrawRectangle((int)(x + w / 2.0f + 1.0f), (int)(y + 4.0f), 8, 3, lightRight);
 }
 
+// --- PINK FUEL ITEM (F) ---
 static void DrawFuelItem(Rectangle rect, Color color) {
     float x = rect.x;
     float y = rect.y;
@@ -661,13 +785,138 @@ static void DrawFuelItem(Rectangle rect, Color color) {
     DrawRectangle((int)(x + w / 2.0f - 2.0f), (int)(y - 5.0f), 4, 3, LIGHTGRAY);
     DrawLineEx((Vector2){ x + 4.0f, y + 6.0f }, (Vector2){ x + w - 4.0f, y + h - 6.0f }, 2.0f, Fade(WHITE, 0.3f));
     DrawRectangleRounded((Rectangle){ x + 6.0f, y + h / 2.0f - 7.0f, w - 12.0f, 14.0f }, 0.3f, 2, WHITE);
-    DrawCustomText("F", (Vector2){ x + w / 2.0f - 3.0f, y + h / 2.0f - 5.0f }, 10.0f, 1.0f, (Color){ 180, 30, 60, 255 });
+    DrawCustomText("F", (Vector2){ x + w / 2.0f - 3.0f, y + h / 2.0f - 5.0f }, 10.0f, 1.0f, (Color){ 220, 40, 130, 255 });
 }
 
-void RenderGame(const GameContext *game) {
+// --- BLUE NITRO ITEM (N) ---
+static void DrawNitroItem(Rectangle rect, Color color) {
+    float x = rect.x;
+    float y = rect.y;
+    float w = rect.width;
+    float h = rect.height;
+
+    DrawRectangleRounded((Rectangle){ x + 2.0f, y + 3.0f, w, h }, 0.2f, 4, (Color){ 0, 0, 0, 60 });
+    DrawRectangleRounded(rect, 0.25f, 4, color);
+
+    DrawRectangle((int)(x + w / 2.0f - 4.0f), (int)(y - 3.0f), 8, 4, DARKGRAY);
+    DrawRectangle((int)(x + w / 2.0f - 2.0f), (int)(y - 5.0f), 4, 3, LIGHTGRAY);
+    DrawLineEx((Vector2){ x + 4.0f, y + 6.0f }, (Vector2){ x + w - 4.0f, y + h - 6.0f }, 2.0f, Fade(WHITE, 0.3f));
+    DrawRectangleRounded((Rectangle){ x + 6.0f, y + h / 2.0f - 7.0f, w - 12.0f, 14.0f }, 0.3f, 2, WHITE);
+    DrawCustomText("N", (Vector2){ x + w / 2.0f - 3.0f, y + h / 2.0f - 5.0f }, 10.0f, 1.0f, (Color){ 0, 110, 210, 255 });
+}
+
+// --- GREEN INVISIBILITY ITEM (I) ---
+static void DrawInvisibleItem(Rectangle rect, Color color) {
+    float x = rect.x;
+    float y = rect.y;
+    float w = rect.width;
+    float h = rect.height;
+
+    DrawRectangleRounded((Rectangle){ x + 2.0f, y + 3.0f, w, h }, 0.2f, 4, (Color){ 0, 0, 0, 60 });
+    DrawRectangleRounded(rect, 0.25f, 4, color);
+
+    DrawRectangle((int)(x + w / 2.0f - 4.0f), (int)(y - 3.0f), 8, 4, DARKGRAY);
+    DrawRectangle((int)(x + w / 2.0f - 2.0f), (int)(y - 5.0f), 4, 3, LIGHTGRAY);
+    DrawLineEx((Vector2){ x + 4.0f, y + 6.0f }, (Vector2){ x + w - 4.0f, y + h - 6.0f }, 2.0f, Fade(WHITE, 0.3f));
+    DrawRectangleRounded((Rectangle){ x + 6.0f, y + h / 2.0f - 7.0f, w - 12.0f, 14.0f }, 0.3f, 2, WHITE);
+    DrawCustomText("I", (Vector2){ x + w / 2.0f - 2.0f, y + h / 2.0f - 5.0f }, 10.0f, 1.0f, (Color){ 20, 130, 60, 255 });
+}
+
+void RenderGame(GameContext *game) {
     if (game->currentState == MENU) {
         DrawMenuScreen(game);
         return;
+    }
+
+    // --- PAUSE MENU INPUT LOGIC ---
+    if (game->currentState == PAUSED) {
+        Vector2 mousePos = GetMousePosition();
+
+        if (IsKeyPressed(KEY_DOWN) || IsKeyPressed(KEY_S) || IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_W)) {
+            pauseSelectedOption = 1 - pauseSelectedOption;
+            PlayButtonHoverSound();
+        }
+
+        int panelW = 280;
+        int panelH = 160;
+        Rectangle pausePanel = { (SCREEN_WIDTH - panelW) / 2.0f, (SCREEN_HEIGHT - panelH) / 2.0f, (float)panelW, (float)panelH };
+        Rectangle btnResume = { SCREEN_WIDTH / 2.0f - 110.0f, pausePanel.y + 55.0f, 220.0f, 36.0f };
+        Rectangle btnMenu   = { SCREEN_WIDTH / 2.0f - 110.0f, pausePanel.y + 102.0f, 220.0f, 36.0f };
+
+        if (CheckCollisionPointRec(mousePos, btnResume)) {
+            if (pauseSelectedOption != 0) PlayButtonHoverSound();
+            pauseSelectedOption = 0;
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
+                game->currentState = PLAYING;
+            }
+        } else if (CheckCollisionPointRec(mousePos, btnMenu)) {
+            if (pauseSelectedOption != 1) PlayButtonHoverSound();
+            pauseSelectedOption = 1;
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                PlayMenuSelectSound();
+                StopPoliceSirenSound();
+                StopAmbulanceSirenSound();
+                StopBGM();
+                game->currentState = MENU;
+                currentMenuState = MENU_STATE_MAIN;
+                PlayMenuBGM();
+                return;
+            }
+        }
+
+        if (IsKeyPressed(KEY_ENTER)) {
+            PlayMenuSelectSound();
+            if (pauseSelectedOption == 0) {
+                game->currentState = PLAYING;
+            } else {
+                StopPoliceSirenSound();
+                StopAmbulanceSirenSound();
+                StopBGM();
+                game->currentState = MENU;
+                currentMenuState = MENU_STATE_MAIN;
+                PlayMenuBGM();
+                return;
+            }
+        }
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            PlayMenuSelectSound();
+            game->currentState = PLAYING;
+        }
+    }
+
+    // --- GAME OVER INPUT LOGIC ---
+    if (game->currentState == GAME_OVER) {
+        Vector2 mousePos = GetMousePosition();
+
+        int panelW = 310;
+        int panelH = 195;
+        Rectangle goPanel = { (SCREEN_WIDTH - panelW) / 2.0f, (SCREEN_HEIGHT - panelH) / 2.0f, (float)panelW, (float)panelH };
+        Rectangle btnRestart = { SCREEN_WIDTH / 2.0f - 110.0f, goPanel.y + 142.0f, 220.0f, 32.0f };
+
+        if ((CheckCollisionPointRec(mousePos, btnRestart) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) ||
+            IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) {
+            PlayMenuSelectSound();
+            InitGame(game);
+            LoadUserDataFromCSV(game);
+            game->attempts++;
+            SaveUserDataToCSV(game);
+            game->currentState = PLAYING;
+            StopMenuBGM();
+            PlayBGM();
+            return;
+        }
+
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            PlayMenuSelectSound();
+            StopPoliceSirenSound();
+            StopAmbulanceSirenSound();
+            StopBGM();
+            game->currentState = MENU;
+            currentMenuState = MENU_STATE_MAIN;
+            PlayMenuBGM();
+            return;
+        }
     }
 
     BeginDrawing();
@@ -699,6 +948,18 @@ void RenderGame(const GameContext *game) {
     for (int i = 0; i < MAX_FUELS; i++) {
         if (game->fuels[i].active) {
             DrawFuelItem(game->fuels[i].rect, game->fuels[i].color);
+        }
+    }
+
+    for (int i = 0; i < MAX_NITROS; i++) {
+        if (game->nitros[i].active) {
+            DrawNitroItem(game->nitros[i].rect, game->nitros[i].color);
+        }
+    }
+
+    for (int i = 0; i < MAX_INVISIBLES; i++) {
+        if (game->invisibles[i].active) {
+            DrawInvisibleItem(game->invisibles[i].rect, game->invisibles[i].color);
         }
     }
 
@@ -768,41 +1029,80 @@ void RenderGame(const GameContext *game) {
     Vector2 fuelTextSz = MeasureCustomText(fuelStr, 10.0f, 1.0f);
     DrawCustomText(fuelStr, (Vector2){ SCREEN_WIDTH - 140.0f + maxFuelWidth - fuelTextSz.x - 4.0f, 46.0f }, 10.0f, 1.0f, fuelColor);
 
+    // --- NITRO BOOST & INVISIBILITY REMAINING TIME HUD ---
+    if (game->nitroTimer > 0.0f) {
+        float nitroBarW = 160.0f;
+        float nitroBarH = 26.0f;
+        Rectangle nitroBox = { (SCREEN_WIDTH - nitroBarW) / 2.0f, 76.0f, nitroBarW, nitroBarH };
+        DrawRectangleRounded(nitroBox, 0.4f, 4, (Color){ 10, 25, 45, 235 });
+        DrawRectangleRoundedLines(nitroBox, 0.4f, 4, (Color){ 0, 180, 255, 255 });
+
+        const char *nitroStr = TextFormat("NITRO BOOST: %.1f s", game->nitroTimer);
+        Vector2 nitroSz = MeasureCustomText(nitroStr, 11.0f, 1.0f);
+        DrawCustomText(nitroStr, (Vector2){ nitroBox.x + (nitroBarW - nitroSz.x) / 2.0f, nitroBox.y + (nitroBarH - nitroSz.y) / 2.0f }, 11.0f, 1.0f, (Color){ 0, 220, 255, 255 });
+    }
+
+    if (game->invisibleTimer > 0.0f) {
+        float invBarW = 160.0f;
+        float invBarH = 26.0f;
+        float invY = (game->nitroTimer > 0.0f) ? 107.0f : 76.0f;
+        Rectangle invBox = { (SCREEN_WIDTH - invBarW) / 2.0f, invY, invBarW, invBarH };
+        DrawRectangleRounded(invBox, 0.4f, 4, (Color){ 12, 35, 20, 235 });
+        DrawRectangleRoundedLines(invBox, 0.4f, 4, (Color){ 46, 204, 113, 255 });
+
+        const char *invStr = TextFormat("INVISIBLE: %.1f s", game->invisibleTimer);
+        Vector2 invSz = MeasureCustomText(invStr, 11.0f, 1.0f);
+        DrawCustomText(invStr, (Vector2){ invBox.x + (invBarW - invSz.x) / 2.0f, invBox.y + (invBarH - invSz.y) / 2.0f }, 11.0f, 1.0f, (Color){ 46, 204, 113, 255 });
+    }
+
+    // Pause Menu Overlay Modal
+    if (game->currentState == PAUSED) {
+        DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 8, 10, 14, 210 });
+
+        int panelW = 280;
+        int panelH = 160;
+        Rectangle pausePanel = { (SCREEN_WIDTH - panelW) / 2.0f, (SCREEN_HEIGHT - panelH) / 2.0f, (float)panelW, (float)panelH };
+        DrawRectangleRounded(pausePanel, 0.12f, 6, (Color){ 18, 22, 30, 240 });
+        DrawRectangleRoundedLines(pausePanel, 0.12f, 6, (Color){ 45, 65, 95, 255 });
+
+        const char *pauseTitle = "GAME PAUSED";
+        Vector2 pauseTitleSz = MeasureCustomText(pauseTitle, 14.0f, 1.0f);
+        DrawCustomText(pauseTitle, (Vector2){ pausePanel.x + (panelW - pauseTitleSz.x) / 2.0f, pausePanel.y + 20.0f }, 14.0f, 1.0f, (Color){ 0, 200, 255, 255 });
+        DrawLine((int)pausePanel.x + 20, (int)pausePanel.y + 42, (int)pausePanel.x + panelW - 20, (int)pausePanel.y + 42, Fade(WHITE, 0.15f));
+
+        Rectangle btnResume = { SCREEN_WIDTH / 2.0f - 110.0f, pausePanel.y + 55.0f, 220.0f, 36.0f };
+        Rectangle btnMenu   = { SCREEN_WIDTH / 2.0f - 110.0f, pausePanel.y + 102.0f, 220.0f, 36.0f };
+
+        DrawCapsuleButton(btnResume, "RESUME",        pauseSelectedOption == 0);
+        DrawCapsuleButton(btnMenu,   "EXIT TO MENU",  pauseSelectedOption == 1);
+    }
+
     // Game Over Overlay Modal
     if (game->currentState == GAME_OVER) {
-        DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 8, 10, 14, 230 });
+        DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){ 10, 5, 8, 220 });
 
         int panelW = 310;
         int panelH = 195;
         Rectangle goPanel = { (SCREEN_WIDTH - panelW) / 2.0f, (SCREEN_HEIGHT - panelH) / 2.0f, (float)panelW, (float)panelH };
+        DrawRectangleRounded(goPanel, 0.12f, 6, (Color){ 20, 15, 22, 245 });
+        DrawRectangleRoundedLines(goPanel, 0.12f, 6, (Color){ 231, 76, 60, 255 });
 
-        DrawRectangleRounded(goPanel, 0.12f, 8, COLOR_UI_PANEL);
-        DrawRectangleRoundedLines(goPanel, 0.12f, 8, (Color){ 80, 35, 40, 255 });
-        DrawRectangleRounded((Rectangle){ goPanel.x, goPanel.y, (float)panelW, 6.0f }, 0.5f, 4, (Color){ 231, 76, 60, 255 });
-
-        const char *goTitle = "VEHICLE DISABLED";
+        const char *goTitle = "RACE TERMINATED";
         Vector2 goTitleSz = MeasureCustomText(goTitle, 16.0f, 1.0f);
-        DrawCustomText(goTitle, (Vector2){ SCREEN_WIDTH / 2.0f - goTitleSz.x / 2.0f, goPanel.y + 22.0f }, 16.0f, 1.0f, (Color){ 231, 76, 60, 255 });
+        DrawCustomText(goTitle, (Vector2){ goPanel.x + (panelW - goTitleSz.x) / 2.0f, goPanel.y + 18.0f }, 16.0f, 1.0f, (Color){ 231, 76, 60, 255 });
+        DrawLine((int)goPanel.x + 20, (int)goPanel.y + 42, (int)goPanel.x + panelW - 20, (int)goPanel.y + 42, Fade(WHITE, 0.15f));
 
-        const char *scoreStr = TextFormat("FINAL SCORE: %06i", (int)game->floatScore);
-        Vector2 scoreSz = MeasureCustomText(scoreStr, 12.0f, 1.0f);
-        DrawCustomText(scoreStr, (Vector2){ SCREEN_WIDTH / 2.0f - scoreSz.x / 2.0f, goPanel.y + 60.0f }, 12.0f, 1.0f, WHITE);
+        DrawCustomText("FINAL SCORE:", (Vector2){ goPanel.x + 30.0f, goPanel.y + 55.0f }, 11.0f, 1.0f, (Color){ 160, 170, 185, 255 });
+        DrawCustomText(TextFormat("%06i", (int)game->floatScore), (Vector2){ goPanel.x + 190.0f, goPanel.y + 55.0f }, 12.0f, 1.0f, WHITE);
 
-        const char *bestStr = TextFormat("HIGH SCORE: %06i", game->highScore);
-        Vector2 bestSz = MeasureCustomText(bestStr, 11.0f, 1.0f);
-        DrawCustomText(bestStr, (Vector2){ SCREEN_WIDTH / 2.0f - bestSz.x / 2.0f, goPanel.y + 88.0f }, 11.0f, 1.0f, (Color){ 241, 196, 15, 255 });
+        DrawCustomText("PERSONAL BEST:", (Vector2){ goPanel.x + 30.0f, goPanel.y + 80.0f }, 11.0f, 1.0f, (Color){ 160, 170, 185, 255 });
+        DrawCustomText(TextFormat("%06i", game->highScore), (Vector2){ goPanel.x + 190.0f, goPanel.y + 80.0f }, 12.0f, 1.0f, GOLD);
 
-        const char *attStr = TextFormat("ATTEMPTS: %d | DRIVER: %s", game->attempts, game->playerName);
-        Vector2 attSz = MeasureCustomText(attStr, 10.0f, 1.0f);
-        DrawCustomText(attStr, (Vector2){ SCREEN_WIDTH / 2.0f - attSz.x / 2.0f, goPanel.y + 114.0f }, 10.0f, 1.0f, (Color){ 140, 155, 175, 255 });
+        DrawCustomText("ATTEMPTS:", (Vector2){ goPanel.x + 30.0f, goPanel.y + 105.0f }, 11.0f, 1.0f, (Color){ 160, 170, 185, 255 });
+        DrawCustomText(TextFormat("%d", game->attempts), (Vector2){ goPanel.x + 190.0f, goPanel.y + 105.0f }, 12.0f, 1.0f, WHITE);
 
-        Rectangle btnRect = { SCREEN_WIDTH / 2.0f - 110.0f, goPanel.y + 142.0f, 220.0f, 32.0f };
-        DrawRectangleRounded(btnRect, 0.3f, 4, (Color){ 25, 35, 50, 255 });
-        DrawRectangleRoundedLines(btnRect, 0.3f, 4, (Color){ 52, 152, 219, 255 });
-        
-        const char *restartStr = "PRESS [ ENTER ] TO RESTART";
-        Vector2 restartSz = MeasureCustomText(restartStr, 10.0f, 1.0f);
-        DrawCustomText(restartStr, (Vector2){ SCREEN_WIDTH / 2.0f - restartSz.x / 2.0f, btnRect.y + 11.0f }, 10.0f, 1.0f, (Color){ 120, 190, 255, 255 });
+        Rectangle btnRestart = { SCREEN_WIDTH / 2.0f - 110.0f, goPanel.y + 142.0f, 220.0f, 32.0f };
+        DrawCapsuleButton(btnRestart, "PLAY AGAIN", true);
     }
 
     EndDrawing();
